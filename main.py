@@ -1,3 +1,15 @@
+BREAK_WORD = [
+    " ",
+    "(",
+    ")",
+    "[",
+    "]",
+    "/",
+    "*",
+    "+",
+    "-",
+    ]
+
 class Scan:
     def __init__(self, nome_arquivo):
         self.nome_arquivo  = nome_arquivo
@@ -22,14 +34,19 @@ class Scan:
             self.interador +=1
             return valor
 
-    def getNextToken(self):
+    def getTokens(self):
         current_token = ""
+        tokens = []
         parada = False
         while self.nextCharSemAcrescimo() != "" and not parada:
             _char = self.nextChar()
+            if _char in BREAK_WORD:
+                tokens.append(current_token)
+                current_token = ''
             
-            current_token+=_char
-        print(current_token)
+            current_token= current_token + _char
+            
+        print(tokens)
 l = Scan("input.txt")
-l.getNextToken()
+l.getTokens()
 
