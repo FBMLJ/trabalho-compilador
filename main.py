@@ -1,4 +1,4 @@
-BREAK_WORD = [
+BREAK_LETTER = [
     " ",
     "(",
     ")",
@@ -9,6 +9,10 @@ BREAK_WORD = [
     "+",
     "-",
     ]
+
+import Atomato
+
+
 
 class Scan:
     def __init__(self, nome_arquivo):
@@ -40,7 +44,7 @@ class Scan:
         parada = False
         while self.nextCharSemAcrescimo() != "" and not parada:
             _char = self.nextChar()
-            if _char in BREAK_WORD:
+            if _char in BREAK_LETTER:
                 tokens.append(current_token)
                 current_token = ''
             
