@@ -32,7 +32,7 @@ class Scan:
         parada = False
         while self.nextCharSemAcrescimo() != "" and not parada:
             _char = self.nextChar()
-            if _char in BREAK_LETTER:
+            if _char in []:
                 tokens.append(current_token)
                 current_token = ''
             
