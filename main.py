@@ -1,16 +1,4 @@
-BREAK_LETTER = [
-    " ",
-    "(",
-    ")",
-    "[",
-    "]",
-    "/",
-    "*",
-    "+",
-    "-",
-    ]
-
-import Atomato
+from Atomato import Atomato
 
 
 
