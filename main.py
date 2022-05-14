@@ -42,3 +42,5 @@ class Scan:
 l = Scan("input.txt")
 l.getTokens()
 
+
+
