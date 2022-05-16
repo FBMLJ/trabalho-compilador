@@ -1,5 +1,5 @@
 from enum import auto
-from .Automato import Automato, get_afd_reserved_words
+from .Automato import Automato, get_afd_reserved_words, get_afd_id, get_afd_number
 
 class Scan:
     def __init__(self, nome_arquivo):
@@ -9,7 +9,9 @@ class Scan:
         
     def restart_automato_list(self):
         self.automato_list = [
-            get_afd_reserved_words()
+            get_afd_reserved_words(),
+            get_afd_id(),
+            get_afd_number()
         ]
     def next_char_sem_acrescimo(self):
         with open(self.nome_arquivo,'r',encoding = 'utf-8') as f:
@@ -28,7 +30,7 @@ class Scan:
     def get_tokens(self):
         tokens = []
         parada = False
-        
+        print()
         
         while self.next_char_sem_acrescimo() != "" and not parada:
             while self.next_char_sem_acrescimo() in " \n":
@@ -40,12 +42,12 @@ class Scan:
                 control = automato.read_new_char(_char, self.next_char_sem_acrescimo(),False)
                 if control:
                     tokens.append(str(automato))
-                    print(automato)
+                    print(automato, end=" ")
                     self.restart_automato_list()
                     
                     break
             
             # current_token = ''
             # current_token += _char
-
-        # print(tokens)
+        print()
+        

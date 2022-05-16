@@ -1,11 +1,12 @@
 void main(){
     int lucas = 2;
+    int VitOr = 3
     while (lucas == 2) {
         if (lucas == 2){
             lucas = lucas + 1;
         }
         else {
-            lucas = lucas - 1;
+            VitOr = lucas - 1;
         }
     }
     return

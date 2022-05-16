@@ -75,6 +75,11 @@ def get_afd_reserved_words():
         22: {"n": 21}
     }, nome_token="PALAVRA RESERVADA")
 
+def get_afd_id():
+    return Automato(estados_de_aceitacao=[1], transicoes={0:{"<LETTER>": 1}, 1: {"<LETTER>": 1}}, nome_token="ID")
+
+def get_afd_number():
+    return Automato(estados_de_aceitacao=[1], transicoes={0:{"<NUMBER>": 1}, 1: {"<NUMBER>": 1}}, nome_token="NUMERO")
 
 
 
