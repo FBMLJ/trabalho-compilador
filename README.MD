@@ -1,10 +1,5 @@
-## O que falta
+## TODO (Analisador Léxico)
 
- - Desconsiderar os espaços e quebra de linhas na hora de ler
- - Implementação dos atomatos
-  - palavras reservadas Lucas
-  - id Lucas
-  - caracter especiais
-  - operadores
- - Scanner loop melhorias, resetar atomato
- - Mostrar tokens
+# Implementar AFD de Comentários
+# Ajustar break_words para operadores alg/relop com IDs (funciona para números)
+# ex.: lucas<=vitor está detectando apenas os tokens 'lucas' e '<='

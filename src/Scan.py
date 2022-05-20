@@ -1,5 +1,5 @@
 from enum import auto
-from .Automato import Automato, get_afd_reserved_words, get_afd_id, get_afd_number
+from .Automato import *
 
 class Scan:
     def __init__(self, nome_arquivo):
@@ -11,7 +11,12 @@ class Scan:
         self.automato_list = [
             get_afd_reserved_words(),
             get_afd_id(),
-            get_afd_number()
+            get_afd_number(),
+            get_afd_algebric_op(),
+            get_afd_special_char(),
+            get_afd_relop(),
+            get_afd_assignment(),
+            # get_afd_comments(),
         ]
     def next_char_sem_acrescimo(self):
         with open(self.nome_arquivo,'r',encoding = 'utf-8') as f:
@@ -32,22 +37,33 @@ class Scan:
         parada = False
         print()
         
-        while self.next_char_sem_acrescimo() != "" and not parada:
+        while self.next_char_sem_acrescimo() != "" and not parada: # parada está sendo utilizado?
             while self.next_char_sem_acrescimo() in " \n":
                 self.iterador += 1
                 self.restart_automato_list()
             _char = self.next_char()
             
             for automato in self.automato_list:
-                control = automato.read_new_char(_char, self.next_char_sem_acrescimo(),False)
-                if control:
+
+                final_token = automato.read_new_char(_char, self.next_char_sem_acrescimo(), False)
+                if final_token:
                     tokens.append(str(automato))
-                    print(automato, end=" ")
+                    # print(automato, end=" ")
                     self.restart_automato_list()
                     
                     break
+        
+        for i in range(len(tokens)-1):
+            # TODO: refatorar este workaround
+            if tokens[i] == tokens[i+1] == '["=",ATRIBUIÇÃO]':
+                tokens[i] = '["==", OPERADOR RELACIONAL]'
+                tokens[i+1] = None
+
+        filtered_tokens = list(filter(None, tokens)) 
+        for token in filtered_tokens:
+            print(token, end=" ")
             
-            # current_token = ''
-            # current_token += _char
+
+
         print()
         
