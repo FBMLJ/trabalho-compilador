@@ -1,19 +1,14 @@
 from enum import auto
-from .Automato import Automato, get_afd_reserved_words, get_afd_id, get_afd_number
-
+from .Automato2 import get_automato
 class Scan:
     def __init__(self, nome_arquivo):
         self.nome_arquivo  = nome_arquivo
         self.iterador = 0
-        self.restart_automato_list()
+        self.restart_automato()
         
     #cria os atomatos do scanner alem de reinicializa-los quando necessario
-    def restart_automato_list(self):
-        self.automato_list = [
-            get_afd_reserved_words(),
-            get_afd_id(),
-            get_afd_number()
-        ]
+    def restart_automato(self):
+        self.automato = get_automato()
 
 
     def next_char_sem_acrescimo(self):
@@ -33,25 +28,27 @@ class Scan:
     def get_tokens(self):
         tokens = []
         parada = False
-        print()
+        
         
         while self.next_char_sem_acrescimo() != "" and not parada:
-            while self.next_char_sem_acrescimo() in " \n":
-                self.iterador += 1
-                self.restart_automato_list()
+            
             _char = self.next_char()
             
-            for automato in self.automato_list:
-                control = automato.read_new_char(_char, self.next_char_sem_acrescimo(),False)
-                
-                if control:
-                    tokens.append(str(automato))
-                    print(automato, end=" ")
-                    self.restart_automato_list()
-                    
-                    break
+            automato = self.automato
+            next_char = self.next_char_sem_acrescimo()
+            if next_char == '':
+                next_char = ' '
+
+            control = automato.read_new_char(_char, next_char)
             
+            if control:
+                tokens.append(str(automato))
+                print(automato, end=" ")
+                self.restart_automato()
+                
+                break
+        
             # current_token = ''
             # current_token += _char
-        print()
+        print(tokens)
         

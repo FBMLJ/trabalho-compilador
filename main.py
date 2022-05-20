@@ -1,5 +1,5 @@
-from src.Automato import Automato
-from src.Scan import Scan
+
+from src.Scan2 import Scan
 
 if __name__ == "__main__":
     scan = Scan("input.txt")
