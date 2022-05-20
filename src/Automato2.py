@@ -3,7 +3,7 @@ from lib2to3.pgen2.token import OP
 from string import ascii_letters
 
 #Constantes
-OTHER_SPECIAL_CHAR = '()[];\{\}'
+OTHER_SPECIAL_CHAR = '()[];\{\},'
 CLOSE_CHAR = ' ()[];\{\}\n+-=<>*/!'
 LETTER = ascii_letters
 DIGITS:4 = '1234567890'
