@@ -115,7 +115,7 @@ def get_afd_special_char():
     }, nome_token="CARACTERE ESPECIAL")
 
 def get_afd_assignment():
-    return Automato(estados_de_aceitacao=[1], transicoes={0:{"=": 1}, 1:{}}, nome_token="ATRIBUIÇÃO")
+    return Automato(estados_de_aceitacao=[1], transicoes={0:{"=": 1}, 1:{}}, break_words=DEFAULT_BREAK_CHARS.replace("=","") + ascii_letters + "0123456789", nome_token="ATRIBUIÇÃO")
 
 # Exemplo
 # a = Automato([2,3], [{"LETTER": 1}, {"LETTER": 2}, {"LETTER": 3}, {}])

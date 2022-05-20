@@ -1,8 +1,8 @@
 void main(){
     int lucas = 2;
     int VitOr = 3;
-    while(lucas!=2) {
-        if(lucas>=Vit0r) {
+    while(lucas==2) {
+        if(lucas>=VitOr) {
             lucas=lucas+1;
         }
 

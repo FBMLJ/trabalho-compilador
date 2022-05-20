@@ -48,22 +48,10 @@ class Scan:
                 final_token = automato.read_new_char(_char, self.next_char_sem_acrescimo(), False)
                 if final_token:
                     tokens.append(str(automato))
-                    # print(automato, end=" ")
+                    print(automato, end=" ")
                     self.restart_automato_list()
                     
                     break
         
-        for i in range(len(tokens)-1):
-            # TODO: refatorar este workaround
-            if tokens[i] == tokens[i+1] == '["=",ATRIBUIÇÃO]':
-                tokens[i] = '["==", OPERADOR RELACIONAL]'
-                tokens[i+1] = None
-
-        filtered_tokens = list(filter(None, tokens)) 
-        for token in filtered_tokens:
-            print(token, end=" ")
-            
-
-
         print()
         
