@@ -77,7 +77,7 @@ def get_automato():
     return Automato(
     estados_de_aceitacao=[2],
     transicoes={
-        0: {LETTER: 1, SPACE: 0, OPERADOR: 3, DIGITS:4,"=": 5,"><": 6, "!": 8,OTHER_SPECIAL_CHAR: 9},
+        0: {LETTER: 1, SPACE: 0, "+-*": 3, DIGITS:4,"=": 5,"><": 6, "!": 8,OTHER_SPECIAL_CHAR: 9, "/": 10},
         #id e palavra reservada
         1: {LETTER: 1, (SPACE+CLOSE_CHAR): 2},
         #operadores não logico
@@ -90,7 +90,11 @@ def get_automato():
         6: {"¬=": 2,"=": 7},
         7: {TUDO: 2},
         8: {"=": 7},
-        9: {TUDO: 2}
+        9: {TUDO: 2},
+        10: {"¬*": 2,"*": 11},
+        11: {"¬*": 11, "*": 12},
+        12: {"*": 12, "/": 0 , "¬*/":11}
+
 
 
         
@@ -102,6 +106,7 @@ def get_automato():
         5: "ATRIBUICAO",
         6: "OPERADOR_LOGICO",
         7:"OPERADOR_LOGICO",
-        9: "CARACTER_ESPECIAL"
+        9: "CARACTER_ESPECIAL",
+        10: "OPERADOR"
     }
     )

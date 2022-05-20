@@ -1,3 +1,5 @@
+
+/* isso é um comentario*/
 void main(){
     int lucas = 2;
     int VitOr = 3;
