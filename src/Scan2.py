@@ -46,9 +46,9 @@ class Scan:
                 print(automato, end=" ")
                 self.restart_automato()
                 
-                break
+                
         
             # current_token = ''
             # current_token += _char
-        print(tokens)
         
+        print()
