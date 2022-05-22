@@ -39,7 +39,7 @@ class Scan:
             
             if token_aceito:
                 tokens.append(str(automato))
-                print(automato, end=" ")
+                print(automato)
                 self.restart_automato()
         
         print()

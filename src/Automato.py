@@ -85,8 +85,7 @@ def get_automato():
             # comentários e divisão
             10: {"¬*": 2,"*": 11}, # 10 -> 2: divisão
             11: {"¬*": 11, "*": 12},
-            12: {"*": 12, "/": 13, "¬*/":11},
-            13: {TUDO: 2}
+            12: {"*": 12, "/": 0, "¬*/":11},
         },
 
         estados_tokens= {
@@ -98,6 +97,5 @@ def get_automato():
             7:"OPERADOR_LOGICO", # != ==
             9: "CARACTERE_ESPECIAL",
             10: "OPERADOR_ALGEBRICO",
-            13: "COMENTÁRIO"
         }
     )
