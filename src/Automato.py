@@ -1,126 +1,103 @@
 from string import ascii_letters
-from .utils.helpers import is_number, is_letter
 
-DEFAULT_BREAK_CHARS = ' ()[];\{\}\n+-=<>*/!'
-DEFAULT_BREAK_WORDS = DEFAULT_BREAK_CHARS + ascii_letters + "0123456789"
+#Constantes
+OTHER_SPECIAL_CHAR = '()[];\{\},'
+CLOSE_CHAR = ' ()[];\{\}\n+-=<>*/!'
+LETTER = ascii_letters
+DIGITS:4 = '1234567890'
+SPACE = ' \n\t'
+OPERADOR = "+-*/"
+TUDO = CLOSE_CHAR+LETTER+DIGITS+SPACE+OPERADOR
+PALAVRAS_RESERVADAS = ["if","else","while","void","int","return"]
 
 class Automato:
-    def __init__(self, estados_de_aceitacao, transicoes, break_words=DEFAULT_BREAK_WORDS, nome_token=''):
+    def __init__(self, estados_de_aceitacao, transicoes, estados_tokens):
         self.token_lido = ''
-        self.break_words = break_words
         self.estado_corrente = 0
         self.estados_de_aceitacao = estados_de_aceitacao
-        self.nome_token = nome_token
+        self.estados_tokens = estados_tokens
+        self.nome_token_atual = None
         self.transicoes = transicoes
         self.valido = True
 
     def __str__(self):
-        return '["{}",{}]'.format(self.token_lido, self.nome_token)
+        return "[{},{}]".format(self.token_lido,self.nome_token_atual)
+
+    def muda_estado(self, numero):
+        self.estado_corrente = numero
+        if numero == 0:
+            self.token_lido = ""
+            self.nome_token_atual = ""
+        elif numero in self.estados_tokens:
+            self.nome_token_atual = self.estados_tokens[numero]
+
     # Adicionar char ao automato para mudar seu estado
-    def read_new_char(self, char_, proximo_char, eof):
+    def read_new_char(self, char_, proximo_char):
         # verifica se o automato ainda está ativo
         if not self.valido:
             return False 
+        self.append_char(char_)
+        temp_estado = self.estado_corrente
+        estado_de_aceitacao = self.append_char(proximo_char)
+        self.token_lido = self.token_lido[:-1]
         
-        self.token_lido += char_
-        existe_transicao_valida = self.search_valid_transition(char_)
+        if estado_de_aceitacao:
+            if self.nome_token_atual == "ID" and  self.token_lido in PALAVRAS_RESERVADAS:
+                self.nome_token_atual = "PALAVRA_RESERVADA"
+            return True
+        else:
+            self.muda_estado(temp_estado)
+ 
 
-        if not existe_transicao_valida:
-            self.valido = False
-            return False
-        elif self.estado_corrente in self.estados_de_aceitacao: # transição é feita e estado é de aceitação
-            if (eof or (proximo_char in self.break_words)): # se break_word for uma lista vazia aceita qualquer char como fim
-                return True
-            else:
-                return False
-        else: # automato valido mas não no se encontra em estado de aceitação
-            return False
-
-    def valid_wildcard_input(self, char, key):
-        #  string padronizadas para qualquer letras LETTER ou/e qualquer numeroNUMBER
-        return (key == "LETTER" and is_letter(char)) or (key == "NUMBER" and is_number(char))
-
-    def search_valid_transition(self, char):
-        
+    def append_char(self, char):
+        self.token_lido += char
         transicoes_estado_corrente = self.transicoes[self.estado_corrente]
+
         for key, value in transicoes_estado_corrente.items():
             matching_character = char in key
             if key[0] == "¬":
                 matching_character = char not in key[1:]
-            if matching_character or self.valid_wildcard_input(char, key): # verifica se há transição válida para o estado atual com char
-                self.estado_corrente = value # passa para o novo estado
-                return True
+            if matching_character: # verifica se há transição válida para o estado atual com char
+                self.muda_estado(value) # passa para o novo estado
+                if self.estado_corrente in self.estados_de_aceitacao:
+                    return True
+                else:
+                    return False
 
-        return False
+        print("PROGRAMA INVÁLIDO - O TOKEN NÃO PODE SER RECONHECIDO " + self.token_lido)
+        exit()
 
 
+def get_automato():
+    return Automato(
+        estados_de_aceitacao=[2],
+        transicoes={
+            0: {SPACE: 0, LETTER: 1, "+-*": 3, DIGITS:4,"=": 5,"><": 6, "!": 8,OTHER_SPECIAL_CHAR: 9, "/": 10},
+            1: {LETTER: 1, (SPACE+CLOSE_CHAR): 2}, #id e palavra reservada
+            # 2: FIM (TOKEN ACEITO)
+            3: {TUDO: 2}, # operadores algébricos
+            4: {DIGITS: 4, ("¬"+DIGITS): 2}, # números
+            5: {"¬=": 2,"=": 7}, # atribuicao
+            6: {"¬=": 2,"=": 7}, # operadores logicos
+            7: {TUDO: 2},
+            8: {"=": 7},
+            9: {TUDO: 2},
+            # comentários e divisão
+            10: {"¬*": 2,"*": 11}, # 10 -> 2: divisão
+            11: {"¬*": 11, "*": 12},
+            12: {"*": 12, "/": 13, "¬*/":11},
+            13: {TUDO: 2}
+        },
 
-
-def get_afd_reserved_words():
-    return Automato(estados_de_aceitacao=[21],
-    transicoes= {
-        0: {"v": 5, "i": 1, "e": 3,"w": 2, "r": 4},
-        1: {"f": 21,"n": 6},
-        2: {"h": 8},
-        3: {"l": 9},
-        4: {"e": 10}, 
-        5: {"o": 11},
-        6: {"t": 21},
-        8: {"i": 13},
-        9: {"s": 14},
-        10: {"t" : 15},
-        11: {"i": 16},
-        13: {"l": 17},
-        14: {'e': 21},
-        15: {"u": 19},
-        16: {"d": 21},
-        17: {"e": 21},
-        19: {"r": 22},
-        22: {"n": 21}
-    }, break_words= DEFAULT_BREAK_CHARS, nome_token="PALAVRA RESERVADA")
-
-def get_afd_id():
-    return Automato(estados_de_aceitacao=[1], transicoes={0:{"LETTER": 1}, 1: {"LETTER": 1}}, break_words= DEFAULT_BREAK_CHARS, nome_token="ID")
-
-def get_afd_number():
-    return Automato(estados_de_aceitacao=[1], transicoes={0:{"NUMBER": 1}, 1: {"NUMBER": 1}}, nome_token="NUMERO")
-
-def get_afd_algebric_op():
-    return Automato(estados_de_aceitacao=[1], transicoes={0:{"+-/*": 1}, 1:{}}, nome_token="OPERADOR ARITMÉTICO")
-
-def get_afd_relop():
-    return Automato(estados_de_aceitacao=[1,2],
-    transicoes = {
-        0: {"<>": 1, "!=": 3},
-        1: {"=": 2},
-        2: {},
-        3: {"=": 2}
-    }, break_words= " ()[];{}\n+-*/!" + "0123456789" + ascii_letters, nome_token="OPERADOR RELACIONAL")
-
-# def get_afd_comments():
-#     return Automato(estados_de_aceitacao=[4], 
-#     transicoes = {
-#         0: {"/": 1},
-#         1: {"*": 2},
-#         2: {"¬*": 2, "*": 3},
-#         3: {"¬*/": 2, "*": 3, "/": 4},
-#         4: {}
-#     }, break_words= "", nome_token= "COMENTÁRIO")
-
-def get_afd_special_char():
-    return Automato(estados_de_aceitacao=[1],
-    transicoes = {
-        0: {"[]();,{}": 1},
-        1: {}
-    }, nome_token="CARACTERE ESPECIAL")
-
-def get_afd_assignment():
-    return Automato(estados_de_aceitacao=[1], transicoes={0:{"=": 1}, 1:{}}, break_words=DEFAULT_BREAK_CHARS.replace("=","") + ascii_letters + "0123456789", nome_token="ATRIBUIÇÃO")
-
-# Exemplo
-# a = Automato([2,3], [{"LETTER": 1}, {"LETTER": 2}, {"LETTER": 3}, {}])
-# a.read_new_char("a", "b", False)
-# a.read_new_char("b", "c", False)
-# a.read_new_char("c", "", False)
-# print(a.__dict__)
-
+        estados_tokens= {
+            1: "ID",
+            3: "OPERADOR_ALGEBRICO",
+            4: "NUMBER",
+            5: "ATRIBUICAO",
+            6: "OPERADOR_LOGICO", # >= <= == ><
+            7:"OPERADOR_LOGICO", # != ==
+            9: "CARACTERE_ESPECIAL",
+            10: "OPERADOR_ALGEBRICO",
+            13: "COMENTÁRIO"
+        }
+    )

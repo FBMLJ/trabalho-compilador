@@ -1,24 +1,13 @@
-from enum import auto
-from .Automato import *
-
+from .Automato import get_automato
 class Scan:
     def __init__(self, nome_arquivo):
         self.nome_arquivo  = nome_arquivo
         self.iterador = 0
-        self.restart_automato_list()
+        self.restart_automato()
         
     #cria os atomatos do scanner alem de reinicializa-los quando necessario
-    def restart_automato_list(self):
-        self.automato_list = [
-            get_afd_reserved_words(),
-            get_afd_id(),
-            get_afd_number(),
-            get_afd_algebric_op(),
-            get_afd_special_char(),
-            get_afd_relop(),
-            get_afd_assignment(),
-            # get_afd_comments(),
-        ]
+    def restart_automato(self):
+        self.automato = get_automato()
 
 
     def next_char_sem_acrescimo(self):
@@ -38,23 +27,19 @@ class Scan:
     def get_tokens(self):
         tokens = []
         parada = False
-        print()
         
-        while self.next_char_sem_acrescimo() != "" and not parada: # parada está sendo utilizado?
-            while self.next_char_sem_acrescimo() in " \n":
-                self.iterador += 1
-                self.restart_automato_list()
+        while self.next_char_sem_acrescimo() != "" and not parada:
             _char = self.next_char()
-            
-            for automato in self.automato_list:
+            automato = self.automato
+            next_char = self.next_char_sem_acrescimo()
+            if next_char == '':
+                next_char = ' '
 
-                final_token = automato.read_new_char(_char, self.next_char_sem_acrescimo(), False)
-                if final_token:
-                    tokens.append(str(automato))
-                    print(automato, end=" ")
-                    self.restart_automato_list()
-                    
-                    break
+            token_aceito = automato.read_new_char(_char, next_char)
+            
+            if token_aceito:
+                tokens.append(str(automato))
+                print(automato, end=" ")
+                self.restart_automato()
         
         print()
-        

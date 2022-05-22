@@ -1,16 +1,15 @@
 
-/* isso é um comentario*/
 void main(){
-    int lucas = 2;
+    int lucas = 222;
     int VitOr = 3;
     while(lucas==2) {
         if(lucas>=VitOr) {
             lucas=lucas+1;
         }
-
-        else {
+        
+        else {/* testando comentário 123 */
             if (lucas < 1) {
-                lucas=1+2;
+                lucas=1+245;
             }
 
             else {
