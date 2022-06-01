@@ -38,8 +38,8 @@ class Scan:
             token_aceito = automato.read_new_char(_char, next_char)
             
             if token_aceito:
-                tokens.append(str(automato))
+                tokens.append(automato.get_token())
                 print(automato)
                 self.restart_automato()
         
-        print()
+        return tokens

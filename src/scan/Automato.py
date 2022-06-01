@@ -10,6 +10,13 @@ OPERADOR = "+-*/"
 TUDO = CLOSE_CHAR+LETTER+DIGITS+SPACE+OPERADOR
 PALAVRAS_RESERVADAS = ["if","else","while","void","int","return"]
 
+class Token:
+    def __init__(self, token_nome, token_lido):
+        self.token_nome = token_nome
+        self.token_lido = token_lido
+    def __str__(self):
+        return "[{},{}]".format(self.token_lido,self.token_nome)
+
 class Automato:
     def __init__(self, estados_de_aceitacao, transicoes, estados_tokens):
         self.token_lido = ''
@@ -22,7 +29,8 @@ class Automato:
 
     def __str__(self):
         return "[{},{}]".format(self.token_lido,self.nome_token_atual)
-
+    def get_token(self):
+        return Token(self.token_lido,self.nome_token_atual)
     def muda_estado(self, numero):
         self.estado_corrente = numero
         if numero == 0:
