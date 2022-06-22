@@ -12,8 +12,8 @@ PALAVRAS_RESERVADAS = ["if","else","while","void","int","return"]
 
 class Token:
     def __init__(self, token_nome, token_lido):
-        self.token_nome = token_nome
-        self.token_lido = token_lido
+        self.token_nome = token_lido
+        self.token_lido =  token_nome
     def __str__(self):
         return "[{},{}]".format(self.token_lido,self.token_nome)
 
