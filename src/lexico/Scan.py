@@ -39,7 +39,7 @@ class Scan:
             
             if token_aceito:
                 tokens.append(automato.get_token())
-                print(automato)
+                # print(automato)
                 self.restart_automato()
         
         return tokens
