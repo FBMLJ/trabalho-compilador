@@ -14,6 +14,7 @@ class Token:
     def __init__(self, token_nome, token_lido):
         self.token_nome = token_lido
         self.token_lido =  token_nome
+        self.linha = None
     def __str__(self):
         return "[{},{}]".format(self.token_lido,self.token_nome)
 

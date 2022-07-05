@@ -2,20 +2,36 @@
 
 # falta implementar 
 class Arvore:
-    def __init__(self, producao):
+    interador = 0
+    def __init__(self, producao, linha=None, pai=None):
         self.nome = producao.nome
         self.folha = producao.eh_terminal
         self.filhos = []
         self.validada = False
-    
+        self.pai = pai
+        self.token_linha = linha
+        
+
+    def get_linha(self):
+
+        if self.token_linha == None:
+            
+            return self.pai.get_linha()
+            
+        else:
+            return self.token_linha
     def limpar_arvore(self):
+        Arvore.interador+=1
         if self.folha:
             if self.validada:
                 return True
-            else: 
+            else:
+                
+                Arvore.erro_message = "Não foi possivel reconhecer {} na linha {}".format(self.nome,self.get_linha())
                 return False
         
 
+        
         for i in range(len(self.filhos)-1,-1,-1):
             filho = self.filhos[i]
             validador = True
@@ -24,11 +40,11 @@ class Arvore:
             if not validador:
                 self.filhos.pop(i)
         if len(self.filhos) > 0:
-            print(self.filhos[0])
+            
             self.filhos = self.filhos[0]
             return True
         else:
-
+                    
             return False
 
 # classe que determinam as produções do gramatica
@@ -49,7 +65,7 @@ class AnalisadorSintatico:
         self.tokens = tokens
         # criando estado original
         self.producoes = [producao_inicial]
-        self.arvore = Arvore(producao_inicial)
+        self.arvore = Arvore(producao_inicial, linha=0)
         # falta implementar a arvore
         self.arvores = None
         # usamos pilha para reconhece o token
@@ -72,7 +88,7 @@ class AnalisadorSintatico:
                 for i in proxima_producao.derivacao:
                     vetor_arvore = []
                     for j in i:
-                        vetor_arvore.append(Arvore(j))
+                        vetor_arvore.append(Arvore(j,pai=proxima_arvore))
                     proxima_arvore.filhos.append(vetor_arvore)
                     
                     self.pilha.append({"tokens": atual["tokens"] , "producoes": i+atual["producoes"][1:], "arvore": vetor_arvore+atual["arvore"][1:]})
@@ -90,7 +106,7 @@ class AnalisadorSintatico:
             for i in proxima_producao.derivacao:
                 vetor_arvore = []
                 for j in i:
-                    vetor_arvore.append(Arvore(j))
+                    vetor_arvore.append(Arvore(j, linha=proximo_token.linha,pai=proxima_arvore))
                 proxima_arvore.filhos.append(vetor_arvore)
                 self.pilha.append({"tokens": atual["tokens"] , "producoes": i+atual["producoes"][1:], "arvore": vetor_arvore+atual["arvore"][1:]})
             return self.reconhece()
@@ -267,4 +283,5 @@ def getAnalisadorSintatico(tokens):
     print(analisador.reconhece())
     arvore = analisador.arvore
     arvore.limpar_arvore()
-    print(len(arvore.filhos))
+    print(arvore.erro_message)
+    

@@ -27,9 +27,11 @@ class Scan:
     def get_tokens(self):
         tokens = []
         parada = False
-        
+        linha_atual = 1
         while self.next_char_sem_acrescimo() != "" and not parada:
             _char = self.next_char()
+            if _char == '\n':
+                linha_atual += 1
             automato = self.automato
             next_char = self.next_char_sem_acrescimo()
             if next_char == '':
@@ -39,6 +41,8 @@ class Scan:
             
             if token_aceito:
                 tokens.append(automato.get_token())
+                tokens[-1].linha = linha_atual
+                
                 # print(automato)
                 self.restart_automato()
         
