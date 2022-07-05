@@ -2,10 +2,34 @@
 
 # falta implementar 
 class Arvore:
-    def __init__(self, nome, eh_folha, filhos):
-        self.nome = nome
-        self.folha = eh_folha
-        self.filhos = filhos
+    def __init__(self, producao):
+        self.nome = producao.nome
+        self.folha = producao.eh_terminal
+        self.filhos = []
+        self.validada = False
+    
+    def limpar_arvore(self):
+        if self.folha:
+            if self.validada:
+                return True
+            else: 
+                return False
+        
+
+        for i in range(len(self.filhos)-1,-1,-1):
+            filho = self.filhos[i]
+            validador = True
+            for  f in filho:
+                validador = validador and f.limpar_arvore()
+            if not validador:
+                self.filhos.pop(i)
+        if len(self.filhos) > 0:
+            print(self.filhos[0])
+            self.filhos = self.filhos[0]
+            return True
+        else:
+
+            return False
 
 # classe que determinam as produções do gramatica
 class Producao:
@@ -25,10 +49,11 @@ class AnalisadorSintatico:
         self.tokens = tokens
         # criando estado original
         self.producoes = [producao_inicial]
+        self.arvore = Arvore(producao_inicial)
         # falta implementar a arvore
         self.arvores = None
         # usamos pilha para reconhece o token
-        self.pilha = [{"tokens": tokens,"producoes": self.producoes}]
+        self.pilha = [{"tokens": tokens,"producoes": self.producoes, "arvore": [self.arvore]}]
 
     def reconhece(self):
         # caso a pilha fique vazia quer dizer que não fomos capazes de reconhecer o programa
@@ -39,34 +64,56 @@ class AnalisadorSintatico:
         if (not atual["tokens"]) and (not atual["producoes"]): # ε
             return True
         elif not atual["tokens"] or not atual["producoes"]:
+            if atual["producoes"]:
+                proxima_producao = atual["producoes"][0]
+                proxima_arvore = atual["arvore"][0]
+                
+
+                for i in proxima_producao.derivacao:
+                    vetor_arvore = []
+                    for j in i:
+                        vetor_arvore.append(Arvore(j))
+                    proxima_arvore.filhos.append(vetor_arvore)
+                    
+                    self.pilha.append({"tokens": atual["tokens"] , "producoes": i+atual["producoes"][1:], "arvore": vetor_arvore+atual["arvore"][1:]})
+            
             return self.reconhece()
         
         # pegando o primeiro token e a primeira producao
         proxima_producao = atual["producoes"][0]
         proximo_token = atual["tokens"][0]
+        proxima_arvore = atual["arvore"][0]
 
         # verificando se a produção é terminal ou não
         if not proxima_producao.eh_terminal:
             # caso seja vamos adicionar na lista todas as produções derivadas trocando pela produção original
             for i in proxima_producao.derivacao:
-                self.pilha.append({"tokens": atual["tokens"] , "producoes": i+atual["producoes"][1:]})
+                vetor_arvore = []
+                for j in i:
+                    vetor_arvore.append(Arvore(j))
+                proxima_arvore.filhos.append(vetor_arvore)
+                self.pilha.append({"tokens": atual["tokens"] , "producoes": i+atual["producoes"][1:], "arvore": vetor_arvore+atual["arvore"][1:]})
             return self.reconhece()
         else:
             # caso seja terminal vamos fazer uma verificação se reconhece o primeiro token
             if proxima_producao.reconhecedor_terminal(proximo_token):
+                proxima_arvore.validada = True
                 #  no caso de ser o ultimo token a ser reconhecido podemos fazer as seguintes ações
                 if len(atual["tokens"]) == 1:
                         #  validar caso tambem seja a ultima produção
                         if len(atual["producoes"] ) == 1:
+                            
                             return True
                         else:
                             # descarta o atual porque não é possivel mais valida-lo
+                            self.pilha.append({"tokens": [],  "producoes": atual["producoes"][1:] , "arvore": atual["arvore"][1:] })
+                
                             return self.reconhece()
                 # caso tenha apenas uma produção terminal e não somente um token não é mais possivel valida entao o descartamos
                 elif len(atual["producoes"]) == 1:
                     return self.reconhece()
                 # caso nenhum situação acima ocorreu removemos o primeiro token a primera produção e adicionamos denovo na pilha
-                self.pilha.append({"tokens": atual["tokens"][1:],  "producoes": atual["producoes"][1:] })
+                self.pilha.append({"tokens": atual["tokens"][1:],  "producoes": atual["producoes"][1:], "arvore": atual["arvore"][1:] })
                 return self.reconhece()
             else:
                 # caso o token terminal não recoheça o descartamos
@@ -218,3 +265,6 @@ producao_fator.derivacao = [
 def getAnalisadorSintatico(tokens):
     analisador=AnalisadorSintatico(tokens ,  producao_inicial=producao_expressao)
     print(analisador.reconhece())
+    arvore = analisador.arvore
+    arvore.limpar_arvore()
+    print(len(arvore.filhos))

@@ -1,1 +1,1 @@
-lucas = 4 < vitor * 2 -2
+a + b + c
