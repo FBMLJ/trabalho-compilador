@@ -3,14 +3,23 @@
 # falta implementar 
 class Arvore:
     interador = 0
-    def __init__(self, producao, linha=None, pai=None):
+    
+    erro_instancia = []
+    def __init__(self, producao, linha=None, pai=None, aceita_vazio = False):
         self.nome = producao.nome
         self.folha = producao.eh_terminal
         self.filhos = []
         self.validada = False
         self.pai = pai
+        self.aceita_vazio = aceita_vazio
         self.token_linha = linha
-        
+    def _antecessor_validado(self):
+        temp = self
+        while temp.pai != None:
+            if temp.pai.validada:
+                return True
+            temp = temp.pai
+        return False
 
     def get_linha(self):
 
@@ -26,27 +35,39 @@ class Arvore:
             if self.validada:
                 return True
             else:
-                
-                Arvore.erro_message = "Não foi possivel reconhecer {} na linha {}".format(self.nome,self.get_linha())
+                Arvore.erro_instancia.append(self)
                 return False
         
 
-        
+        matriz = []
         for i in range(len(self.filhos)-1,-1,-1):
             filho = self.filhos[i]
             validador = True
+            vetor = []
             for  f in filho:
-                validador = validador and f.limpar_arvore()
+                valor = f.limpar_arvore()
+                vetor.append(valor)
+                validador = validador and valor
+            if validador and not filho:
+                validador = False 
+            matriz.append(vetor)
             if not validador:
                 self.filhos.pop(i)
+        print(matriz,len(self.filhos),self.nome,self.aceita_vazio)
         if len(self.filhos) > 0:
-            
             self.filhos = self.filhos[0]
+            self.validada = True
             return True
         else:
-                    
+            Arvore.erro_instancia.append(self)        
             return False
-
+    
+    def getErro(cls):
+        vetorErroMessagem = []
+        for instancia in cls.erro_instancia:
+            if not instancia._antecessor_validado():
+                vetorErroMessagem.append("Ocorreu um erro na {} ao tentar reconhecer {}".format(instancia.token_linha, instancia.nome))
+        return vetorErroMessagem
 # classe que determinam as produções do gramatica
 class Producao:
     def __init__(self, nome , eh_terminal = False, derivacao = [], reconhecedor_terminal = None):
@@ -88,7 +109,7 @@ class AnalisadorSintatico:
                 for i in proxima_producao.derivacao:
                     vetor_arvore = []
                     for j in i:
-                        vetor_arvore.append(Arvore(j,pai=proxima_arvore))
+                        vetor_arvore.append(Arvore(j,pai=proxima_arvore,aceita_vazio=True))
                     proxima_arvore.filhos.append(vetor_arvore)
                     
                     self.pilha.append({"tokens": atual["tokens"] , "producoes": i+atual["producoes"][1:], "arvore": vetor_arvore+atual["arvore"][1:]})
@@ -283,5 +304,7 @@ def getAnalisadorSintatico(tokens):
     print(analisador.reconhece())
     arvore = analisador.arvore
     arvore.limpar_arvore()
-    print(arvore.erro_message)
+    print(arvore.validada)
+    print(arvore.filhos)
+    # print(arvore.getErro())
     
