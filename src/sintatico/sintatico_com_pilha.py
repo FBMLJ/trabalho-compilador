@@ -5,7 +5,7 @@ class Arvore:
     interador = 0
     
     erro_instancia = []
-    def __init__(self, producao, linha=None, pai=None, aceita_vazio = False):
+    def __init__(self, producao, linha=None, pai=None, aceita_vazio = False, token_aceito = None):
         self.nome = producao.nome
         self.folha = producao.eh_terminal
         self.filhos = []
@@ -48,24 +48,23 @@ class Arvore:
                 valor = f.limpar_arvore()
                 vetor.append(valor)
                 validador = validador and valor
-            if validador and not filho:
-                validador = False 
+                if not validador:
+                    break
             matriz.append(vetor)
             if not validador:
                 self.filhos.pop(i)
-        print(matriz,len(self.filhos),self.nome,self.aceita_vazio)
         if len(self.filhos) > 0:
-            self.filhos = self.filhos[0]
+             
             self.validada = True
             return True
         else:
-            Arvore.erro_instancia.append(self)        
+            # Arvore.erro_instancia.append(self)        
             return False
     
     def getErro(cls):
         vetorErroMessagem = []
         for instancia in cls.erro_instancia:
-            if not instancia._antecessor_validado():
+            # if not instancia._antecessor_validado():
                 vetorErroMessagem.append("Ocorreu um erro na {} ao tentar reconhecer {}".format(instancia.token_linha, instancia.nome))
         return vetorErroMessagem
 # classe que determinam as produções do gramatica
@@ -89,6 +88,7 @@ class AnalisadorSintatico:
         self.arvore = Arvore(producao_inicial, linha=0)
         # falta implementar a arvore
         self.arvores = None
+        self.ultima_linha_lido = -1
         # usamos pilha para reconhece o token
         self.pilha = [{"tokens": tokens,"producoes": self.producoes, "arvore": [self.arvore]}]
 
@@ -154,6 +154,9 @@ class AnalisadorSintatico:
                 return self.reconhece()
             else:
                 # caso o token terminal não recoheça o descartamos
+                        
+                self.ultima_linha_lido = max([proximo_token.linha, self.ultima_linha_lido])
+                print(proximo_token.linha, proximo_token.token_lido)
                 return self.reconhece()
 
 
@@ -162,13 +165,16 @@ class AnalisadorSintatico:
 
 # TERMINAIS
 producao_numero = Producao("NUMERO", eh_terminal= True, reconhecedor_terminal= lambda x: x.token_nome == "NUMBER")
+# 28.
 producao_operador_aditivo = Producao("OPERADOR ADITIVO", eh_terminal= True , reconhecedor_terminal= lambda x: x.token_lido in "+-")
+# 31.
 producao_operador_multiplicativo = Producao("OPERADOR MULTIPLICATIVO", eh_terminal= True , reconhecedor_terminal= lambda x: x.token_lido in "*/")
 producao_abre_colchetes = Producao("ABRE COLCHETES", eh_terminal= True , reconhecedor_terminal= lambda x: x.token_lido == "[")
 producao_fecha_colchetes = Producao("FECHA COLCHETES", eh_terminal= True , reconhecedor_terminal= lambda x: x.token_lido == "]")
 producao_abre_parenteses = Producao("ABRE PARÊNTESES", eh_terminal= True , reconhecedor_terminal= lambda x: x.token_lido == "(")
 producao_fecha_parenteses = Producao("FECHA PARÊNTESES", eh_terminal= True , reconhecedor_terminal= lambda x: x.token_lido == ")")
 producao_identificador = Producao("ID", eh_terminal= True , reconhecedor_terminal= lambda x: x.token_nome == "ID")
+# 25.
 producao_operador_logico = Producao("OPERADOR LOGICO",eh_terminal= True,reconhecedor_terminal=lambda x: x.token_nome == "OPERADOR_LOGICO")
 
 # --------------------------------
@@ -222,14 +228,18 @@ producao_decl_loc = Producao("DECLARACAO-LOCAIS")
 # 14. declaracao-locais’ → var-declaracao declaracao-locais’ | ε
 producao_decl_loc1 = Producao("DECLARACAO-LOCAIS'")
 
-
+# 15.
 producao_stmt_list = Producao("STATEMENT-LIST")
+# 16.
 producao_stmt_list1 = Producao("STATEMENT-LIST'")
+# 18.
 producao_exp_stmt = Producao("EXPRESSAO-STMT")
+# 19.
 producao_sel_stmt = Producao("SELECAO-STMT")
+# 20.
 producao_iter_stmt = Producao("ITERACAO-STMT")
+# 21.
 producao_ret_stmt = Producao("RETURN-STMT")
-producao_exp_stmt = Producao("EXPRESSAO")
 
 # 22. expressao → var = expressao | expressao-simples
 producao_expressao = Producao("EXPRESSAO")
@@ -241,25 +251,27 @@ producao_var = Producao("VAR")
 producao_expressao_simples = Producao("EXPRESSAO SIMPLES")
 
 # 26. expressao-aditiva → termo expressao-aditiva’
-# 27. expressao-aditiva’ → operador-aditivo termo expressao-aditiva’ | ε
 producao_expressao_aditiva = Producao("EXPRESSAO ADITIVA")
 
 
 producao_token_atribuicao = Producao("=", eh_terminal= True, reconhecedor_terminal= lambda x: x.token_nome == "ATRIBUICAO")
 
-#29 termo => fator termo'
+# 29. termo => fator termo'
 producao_termo = Producao("TERMO")
 
-#32. fator → ( expressao ) | var | chamada | NUM
+# 32. fator → ( expressao ) | var | chamada | NUM
 producao_fator = Producao("FATOR")
 
 
-#30. termo’ → operador-multiplicativo fator termo’ | ε
+# 30. termo’ → operador-multiplicativo fator termo’ | ε
 producao_termo1 = Producao("TERMO'")
 
 
-#27. expressao-aditiva’ → operador-aditivo termo expressao-aditiva’ | e
+# 27. expressao-aditiva’ → operador-aditivo termo expressao-aditiva’ | e
 producao_expressao_aditiva1 = Producao("EXPRESSAO ADITIVA'")
+
+
+# Faltam instanciar as produções 33,34,35,36, 17
 # DERIVAÇÕES
 producao_var.derivacao = [
     [producao_identificador], 
@@ -302,9 +314,12 @@ producao_fator.derivacao = [
 def getAnalisadorSintatico(tokens):
     analisador=AnalisadorSintatico(tokens ,  producao_inicial=producao_expressao)
     print(analisador.reconhece())
+    print(analisador.ultima_linha_lido)
     arvore = analisador.arvore
     arvore.limpar_arvore()
-    print(arvore.validada)
-    print(arvore.filhos)
+    # print(arvore.validada)
+    # print(arvore.filhos)
+
     # print(arvore.getErro())
+    # print(arvore.validada)
     
