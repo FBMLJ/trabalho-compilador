@@ -1,6 +1,10 @@
 
 
 # falta implementar 
+import token
+from torch import le
+
+
 class Arvore:
     interador = 0
     
@@ -13,6 +17,7 @@ class Arvore:
         self.pai = pai
         self.aceita_vazio = aceita_vazio
         self.token_linha = linha
+        self.token_lido = token_aceito
     def _antecessor_validado(self):
         temp = self
         while temp.pai != None:
@@ -29,37 +34,57 @@ class Arvore:
             
         else:
             return self.token_linha
+    def raiz(self, token, token_lido):
+        if len(token_lido) == len(token):
+            return True
+        else:
+            return False
+
     def limpar_arvore(self):
         Arvore.interador+=1
         if self.folha:
             if self.validada:
-                return True
+                return True, [self.token_lido]
             else:
                 Arvore.erro_instancia.append(self)
-                return False
+                return False,  []
         
 
         matriz = []
+        matriz_token_lido = []
         for i in range(len(self.filhos)-1,-1,-1):
             filho = self.filhos[i]
             validador = True
             vetor = []
+            vetor_token_lido = []
             for  f in filho:
-                valor = f.limpar_arvore()
+                valor, token_lido  = f.limpar_arvore()
                 vetor.append(valor)
+                
+                
+                vetor_token_lido +=  token_lido
                 validador = validador and valor
                 if not validador:
                     break
-            matriz.append(vetor)
+            # matriz_token_lido.append(vetor_token_lido)
             if not validador:
+                
                 self.filhos.pop(i)
+            else:
+                matriz_token_lido = [vetor_token_lido] +  matriz_token_lido
         if len(self.filhos) > 0:
-             
+            
+            
+           
+            
+            self.filhos = self.filhos[0]
             self.validada = True
-            return True
+            print(matriz_token_lido[0])
+            print(len(self.filhos) == len(matriz_token_lido))
+            return True, matriz_token_lido[0]
         else:
             # Arvore.erro_instancia.append(self)        
-            return False
+            return False, []
     
     def getErro(cls):
         vetorErroMessagem = []
@@ -135,6 +160,7 @@ class AnalisadorSintatico:
             # caso seja terminal vamos fazer uma verificação se reconhece o primeiro token
             if proxima_producao.reconhecedor_terminal(proximo_token):
                 proxima_arvore.validada = True
+                proxima_arvore.token_lido =   proximo_token
                 #  no caso de ser o ultimo token a ser reconhecido podemos fazer as seguintes ações
                 if len(atual["tokens"]) == 1:
                         #  validar caso tambem seja a ultima produção
@@ -156,7 +182,7 @@ class AnalisadorSintatico:
                 # caso o token terminal não recoheça o descartamos
                         
                 self.ultima_linha_lido = max([proximo_token.linha, self.ultima_linha_lido])
-                print(proximo_token.linha, proximo_token.token_lido)
+                
                 return self.reconhece()
 
 
@@ -316,8 +342,11 @@ def getAnalisadorSintatico(tokens):
     print(analisador.reconhece())
     print(analisador.ultima_linha_lido)
     arvore = analisador.arvore
-    arvore.limpar_arvore()
-    # print(arvore.validada)
+    valor, token_lido = arvore.limpar_arvore()
+    print(arvore.validada)
+    print(tokens)
+    print(token_lido)
+    print(arvore.raiz(tokens,token_lido))
     # print(arvore.filhos)
 
     # print(arvore.getErro())
