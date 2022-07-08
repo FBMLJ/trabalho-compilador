@@ -38,6 +38,10 @@ class Arvore:
         if len(token_lido) == len(token):
             return True
         else:
+            print(len(token_lido))
+            for i in token:
+                if not i in token_lido:
+                    print("Erro a reconhecer o token {}, na linha {}".format(i.token_lido, i.linha))
             return False
 
     def limpar_arvore(self):
@@ -79,8 +83,8 @@ class Arvore:
             
             self.filhos = self.filhos[0]
             self.validada = True
-            print(matriz_token_lido[0])
-            print(len(self.filhos) == len(matriz_token_lido))
+            # print(matriz_token_lido[0])
+            # print(len(self.filhos) == len(matriz_token_lido))
             return True, matriz_token_lido[0]
         else:
             # Arvore.erro_instancia.append(self)        
@@ -340,12 +344,12 @@ producao_fator.derivacao = [
 def getAnalisadorSintatico(tokens):
     analisador=AnalisadorSintatico(tokens ,  producao_inicial=producao_expressao)
     print(analisador.reconhece())
-    print(analisador.ultima_linha_lido)
+    # print(analisador.ultima_linha_lido)
     arvore = analisador.arvore
     valor, token_lido = arvore.limpar_arvore()
-    print(arvore.validada)
-    print(tokens)
-    print(token_lido)
+    # print(arvore.validada)
+    # print(tokens)
+    # print(token_lido)
     print(arvore.raiz(tokens,token_lido))
     # print(arvore.filhos)
 
