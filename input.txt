@@ -1,6 +1,10 @@
+<<<<<<< Updated upstream
 
 
 
 a + b + c + d + e
 
 + 3
+=======
+a + b + c + if
+>>>>>>> Stashed changes
