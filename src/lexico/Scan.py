@@ -43,7 +43,7 @@ class Scan:
                 tokens.append(automato.get_token())
                 tokens[-1].linha = linha_atual
                 
-                # print(automato)
+                
                 self.restart_automato()
         
         return tokens

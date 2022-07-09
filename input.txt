@@ -1,2 +1,5 @@
-
-id = b >  (a + b * c) + teste
+id = b >  (a + b * c) + id;
+id = b >  (a + b * c) + id;
+id = b >  (a + b * c) + id;
+id = b >  (a + b * c) + id;
+id = b >  (a + b * c) + if;
