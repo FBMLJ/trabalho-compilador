@@ -13,6 +13,7 @@ class Arvore:
         self.aceita_vazio = aceita_vazio
         self.token_linha = linha
         self.token_lido = token_aceito
+        
     def _antecessor_validado(self):
         temp = self
         while temp.pai != None:

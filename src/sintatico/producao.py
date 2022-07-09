@@ -1,4 +1,7 @@
 # classe que determinam as produções do gramatica
+from click import progressbar
+
+
 class Producao:
     def __init__(self, nome , eh_terminal = False, derivacao = [], reconhecedor_terminal = None):
         self.eh_terminal = eh_terminal
@@ -8,7 +11,7 @@ class Producao:
 #  criando as producoes
 
 # TERMINAIS
-producao_virgula = Producao("VIRGULA", eh_terminal=True, reconhecedor_terminal=lambda x: x==",")
+producao_virgula = Producao("VIRGULA", eh_terminal=True, reconhecedor_terminal=lambda x: x.token_lido==",")
 producao_numero = Producao("NUMERO", eh_terminal= True, reconhecedor_terminal= lambda x: x.token_nome == "NUMBER")
 # 28.
 producao_operador_aditivo = Producao("OPERADOR ADITIVO", eh_terminal= True , reconhecedor_terminal= lambda x: x.token_lido in "+-")
@@ -18,9 +21,15 @@ producao_abre_colchetes = Producao("ABRE COLCHETES", eh_terminal= True , reconhe
 producao_fecha_colchetes = Producao("FECHA COLCHETES", eh_terminal= True , reconhecedor_terminal= lambda x: x.token_lido == "]")
 producao_abre_parenteses = Producao("ABRE PARÊNTESES", eh_terminal= True , reconhecedor_terminal= lambda x: x.token_lido == "(")
 producao_fecha_parenteses = Producao("FECHA PARÊNTESES", eh_terminal= True , reconhecedor_terminal= lambda x: x.token_lido == ")")
+producao_abre_chaves = Producao("ABRE CHAVES", eh_terminal=True, reconhecedor_terminal= lambda x: x.token_lido == "{")
+producao_fecha_chaves = Producao("FECHA CHAVES", eh_terminal=True, reconhecedor_terminal= lambda x: x.token_lido == "}")
 producao_identificador = Producao("ID", eh_terminal= True , reconhecedor_terminal= lambda x: x.token_nome == "ID")
 producao_ponto_virgula = Producao("PONTO E VIRGULA", eh_terminal=True, reconhecedor_terminal= lambda x: x.token_lido == ";")
 producao_return  = Producao("RETURN", eh_terminal=True, reconhecedor_terminal= lambda x: x.token_lido == "return")
+producao_if = Producao("IF", eh_terminal=True, reconhecedor_terminal=lambda x: x.token_lido == "if")
+producao_else = Producao("ELSE", eh_terminal=True, reconhecedor_terminal=lambda x: x.token_lido == "else")
+producao_while = Producao("WHILE", eh_terminal=True, reconhecedor_terminal=lambda x: x.token_lido == "while")
+producao_void = Producao("VOID", eh_terminal=True, reconhecedor_terminal=lambda x: x.token_lido == "void")
 # 25.
 producao_operador_logico = Producao("OPERADOR LOGICO",eh_terminal= True,reconhecedor_terminal=lambda x: x.token_nome == "OPERADOR_LOGICO")
 
@@ -32,10 +41,10 @@ producao_operador_logico = Producao("OPERADOR LOGICO",eh_terminal= True,reconhec
 producao_programa = Producao("PROGRAMA")
 
 # 2. lista-de-declaracao → declaracao lista-de-declaração’
-producao_ld = Producao("LISTA DECLARAÇÃO")
+producao_lista_decl = Producao("LISTA DECLARAÇÃO")
 
 # 3. lista-de-declaração’ → declaracao lista-de-declaração’ | ε
-producao_ld1 = Producao("LISTA DECLARAÇÃO'")
+producao_lista_decl1 = Producao("LISTA DECLARAÇÃO'")
 
 # 4. declaracao → var-declaracao | fun-declaracao
 producao_decl = Producao("DECLARAÇÃO")
@@ -133,8 +142,13 @@ producao_termo1 = Producao("TERMO'")
 producao_expressao_aditiva1 = Producao("EXPRESSAO ADITIVA'")
 
 
-# Faltam instanciar as produções 33,34,35,36, 17
+# Faltam instanciar as produções 33,34,35,36, 
 # DERIVAÇÕES
+
+producao_compound_stmt.derivacao = [
+    [producao_abre_chaves, producao_decl_loc, producao_stmt_list, producao_fecha_chaves]    
+]
+
 producao_var.derivacao = [
     [producao_identificador], 
     [producao_identificador, producao_abre_colchetes, producao_expressao, producao_fecha_colchetes]
@@ -168,8 +182,8 @@ producao_termo1.derivacao = [
 producao_fator.derivacao = [
     [producao_abre_parenteses, producao_expressao, producao_fecha_parenteses],
     [producao_var],
-    [producao_numero],
-    #[producao_chamada]
+    [producao_chamada],
+    [producao_numero]
 ]
 
 producao_exp_stmt.derivacao = [
@@ -183,7 +197,7 @@ producao_ret_stmt.derivacao = [
 ]
 
 producao_arg_list.derivacao = [
-    [producao_expressao, producao_arg_list]
+    [producao_expressao, producao_arg_list1]
 ]
 
 producao_arg_list1.derivacao = [
@@ -202,7 +216,10 @@ producao_chamada.derivacao = [
 
 producao_statement.derivacao = [
     [producao_exp_stmt],
-    [producao_ret_stmt]
+    [producao_ret_stmt],
+    [producao_sel_stmt],
+    [producao_iter_stmt],
+    [producao_compound_stmt]
 ]
 
 
@@ -216,5 +233,65 @@ producao_stmt_list1.derivacao = [
     []
 ]
 
+producao_sel_stmt.derivacao = [
+    [producao_if,producao_abre_parenteses, producao_expressao,producao_fecha_parenteses,producao_statement],
+    [producao_if,producao_abre_parenteses, producao_expressao,producao_fecha_parenteses,producao_statement,producao_else,producao_statement]
+]
+producao_iter_stmt.derivacao = [
+    [producao_while, producao_abre_parenteses,producao_expressao, producao_fecha_parenteses, producao_statement]
+]
+
+producao_decl_loc1.derivacao = [
+    [producao_var_decl, producao_decl_loc1],
+    []
+]
+
+
+producao_decl_loc.derivacao = [
+    [producao_var_decl, producao_decl_loc1],
+    [producao_decl_loc1],
+    []
+]
+
+producao_params.derivacao = [
+    [producao_params_list],
+    [producao_void]
+]
+
+producao_params_list.derivacao = [
+    [producao_param, producao_params_list1]
+]
+
+producao_params_list1.derivacao = [
+    [producao_param, producao_params_list1],
+    []
+]
+
+producao_fun_decl.derivacao = [
+    [producao_tipo,producao_identificador, producao_abre_parenteses,producao_params,producao_fecha_parenteses,producao_compound_stmt]
+]
+
+producao_var_decl.derivacao = [
+    [producao_tipo, producao_identificador, producao_ponto_virgula],
+    [producao_tipo, producao_identificador, producao_abre_colchetes, producao_numero, producao_fecha_colchetes, producao_ponto_virgula]
+]
+
+producao_decl.derivacao = [
+    [producao_var_decl], [producao_fun_decl]
+]
+
+producao_lista_decl1.derivacao = [
+    [producao_decl, producao_lista_decl1],
+    []
+]
+
+producao_lista_decl.derivacao = [
+    [producao_decl, producao_lista_decl1],
+]
+
+producao_programa.derivacao = [
+    [producao_lista_decl]
+]
 def get_producao_raiz():
-    return producao_stmt_list
+    return producao_programa
+    

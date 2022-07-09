@@ -2,7 +2,7 @@ from string import ascii_letters
 
 #Constantes
 OTHER_SPECIAL_CHAR = '()[];\{\},'
-CLOSE_CHAR = ' ()[];\{\}\n+-=<>*/!'
+CLOSE_CHAR = ' ()[];\{\}\n+-=<>*/!,'
 LETTER = ascii_letters
 DIGITS:4 = '1234567890'
 SPACE = ' \n\t'

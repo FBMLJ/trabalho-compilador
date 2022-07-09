@@ -1,5 +1,4 @@
-id = b >  (a + b * c) + id;
-id = b >  (a + b * c) + id;
-id = b >  (a + b * c) + id;
-id = b >  (a + b * c) + id;
-id = b >  (a + b * c) + if;
+int main(void){
+    int id;
+    lucas = compiladores < ia ;
+}
