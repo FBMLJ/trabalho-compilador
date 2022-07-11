@@ -1,7 +1,7 @@
 
 
 class Arvore:
-    interador = 0
+    iterador = 0
     
     erro_instancia = []
     def __init__(self, producao, linha=None, pai=None, aceita_vazio = False, token_aceito = None):
@@ -37,11 +37,11 @@ class Arvore:
             
             for i in token:
                 if not i in token_lido:
-                    print("Erro a reconhecer o token {}, na linha {}".format(i.token_lido, i.linha))
+                    print("Erro ao reconhecer o token {}, na linha {}".format(i.token_lido, i.linha))
             return False
 
     def limpar_arvore(self):
-        Arvore.interador+=1
+        Arvore.iterador+=1
         if self.folha:
             if self.validada:
                 return True, [self.token_lido]
@@ -50,7 +50,6 @@ class Arvore:
                 return False,  []
         
 
-        matriz = []
         matriz_token_lido = []
         for i in range(len(self.filhos)-1,-1,-1):
             filho = self.filhos[i]
@@ -60,23 +59,16 @@ class Arvore:
             for  f in filho:
                 valor, token_lido  = f.limpar_arvore()
                 vetor.append(valor)
-                
-                
                 vetor_token_lido +=  token_lido
                 validador = validador and valor
                 if not validador:
                     break
             # matriz_token_lido.append(vetor_token_lido)
             if not validador:
-                
                 self.filhos.pop(i)
             else:
                 matriz_token_lido = [vetor_token_lido] +  matriz_token_lido
         if len(self.filhos) > 0:
-            
-            
-           
-            
             self.filhos = self.filhos[0]
             self.validada = True
             return True, matriz_token_lido[0]

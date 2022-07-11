@@ -1,9 +1,11 @@
+from lib2to3.pgen2 import token
 from .Automato import get_automato
 class Scan:
     def __init__(self, nome_arquivo):
         self.nome_arquivo  = nome_arquivo
         self.iterador = 0
         self.restart_automato()
+        self.identificadores = []
         
     #cria os atomatos do scanner alem de reinicializa-los quando necessario
     def restart_automato(self):
@@ -40,10 +42,15 @@ class Scan:
             token_aceito = automato.read_new_char(_char, next_char)
             
             if token_aceito:
-                tokens.append(automato.get_token())
+                token = automato.get_token() 
+
+                if tokens:
+                    if token.token_nome == "ID" and tokens[-1].token_lido in ["int", "void"] and token.token_lido not in self.identificadores:
+                        self.identificadores.append(token.token_lido)
+
+                tokens.append(token)
                 tokens[-1].linha = linha_atual
                 
                 
                 self.restart_automato()
-        
         return tokens
