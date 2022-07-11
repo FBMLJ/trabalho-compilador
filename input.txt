@@ -1,7 +1,11 @@
+int teste(int c){
+    return c*d;
+}
 int main(void){
     int id;
-    lucas = compiladores < ia ;
-    if (id) {} else
+    int a;
+    int b;
 
-    int id;
+    a = b < 2 * a / b;
+    return teste(a);
 }

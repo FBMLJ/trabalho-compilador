@@ -101,14 +101,14 @@ def get_analisador_sintatico(tokens, identificadores):
     arvore = analisador.arvore
     _, token_lido = arvore.limpar_arvore()
     if eh_valido:
-        print("Programa valido")
+        print("Programa válido")
     else:
-        print("Programa invalido \nErros:")
+        print("Programa inválido \nErros:")
         # arvore.raiz(tokens,token_lido)
     
     
         for j in range(len(tokens)):
             i = tokens[j]
             if i not in analisador.lista_token:
-                print("Ocorreu um erro ao redor do token {}, na linha {}, ultimo token reconhecido {} linha".format(i.token_lido, i.linha, tokens[j-1].token_lido, tokens[j-1].linha))
+                print("Ocorreu um erro ao redor do token {}, na linha {}, último token reconhecido {} linha {}".format(i.token_lido, i.linha, tokens[j-1].token_lido, tokens[j-1].linha))
                 break
