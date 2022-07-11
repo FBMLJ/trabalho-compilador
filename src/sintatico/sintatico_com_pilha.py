@@ -11,6 +11,7 @@ class AnalisadorSintatico:
         self.arvores = None
         self.eh_reconhecido = False
         self.contador = 0
+        self.lista_token = []
         self.ultima_linha_lido = -1
         # usamos pilha para reconhece o token
         self.pilha = [{"tokens": tokens,"producoes": self.producoes, "arvore": [self.arvore]}]
@@ -79,6 +80,7 @@ class AnalisadorSintatico:
                     elif len(atual["producoes"]) == 1:
                         continue
                     # caso nenhum situação acima ocorreu removemos o primeiro token a primera produção e adicionamos denovo na pilha
+                    self.lista_token.append(proximo_token)
                     self.pilha.append({"tokens": atual["tokens"][1:],  "producoes": atual["producoes"][1:], "arvore": atual["arvore"][1:] })
                     continue
                 else:
@@ -94,12 +96,18 @@ from .producao import get_producao_raiz
 def getAnalisadorSintatico(tokens):
     analisador=AnalisadorSintatico(tokens ,  producao_inicial=get_producao_raiz())
     eh_valido = analisador.reconhece()
-    
     arvore = analisador.arvore
     valor, token_lido = arvore.limpar_arvore()
+    
     if eh_valido:
         print("Programa valido")
     else:
         print("Programa invalido \nErros:")
-        arvore.raiz(tokens,token_lido)
+        # arvore.raiz(tokens,token_lido)
     
+    
+        for j in range(len(tokens)):
+            i = tokens[j]
+            if i not in analisador.lista_token:
+                print("Ocorreu um erro ao redor do token {}, na linha {}, ultimo token reconhecido {} linha".format(i.token_lido, i.linha, tokens[j-1].token_lido, tokens[j-1].linha))
+                break
