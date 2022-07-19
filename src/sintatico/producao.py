@@ -30,7 +30,6 @@ producao_if = Producao("IF", eh_terminal=True, reconhecedor_terminal=lambda x: x
 producao_else = Producao("ELSE", eh_terminal=True, reconhecedor_terminal=lambda x: x.token_lido == "else")
 producao_while = Producao("WHILE", eh_terminal=True, reconhecedor_terminal=lambda x: x.token_lido == "while")
 producao_void = Producao("VOID", eh_terminal=True, reconhecedor_terminal=lambda x: x.token_lido == "void")
-# 25.
 producao_operador_logico = Producao("OPERADOR LOGICO",eh_terminal= True,reconhecedor_terminal=lambda x: x.token_nome == "OPERADOR_LOGICO")
 
 # --------------------------------
@@ -292,6 +291,7 @@ producao_lista_decl.derivacao = [
 producao_programa.derivacao = [
     [producao_lista_decl]
 ]
+
 def get_producao_raiz():
     return producao_programa
     

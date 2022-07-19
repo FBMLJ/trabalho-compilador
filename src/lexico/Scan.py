@@ -30,6 +30,7 @@ class Scan:
         tokens = []
         parada = False
         linha_atual = 1
+        
         while self.next_char_sem_acrescimo() != "" and not parada:
             _char = self.next_char()
             if _char == '\n':
@@ -45,6 +46,7 @@ class Scan:
                 token = automato.get_token() 
 
                 if tokens:
+                    # caso exista um token prévio de tipo, adicionamos var a lista de identificadores
                     if token.token_nome == "ID" and tokens[-1].token_lido in ["int", "void"] and token.token_lido not in self.identificadores:
                         self.identificadores.append(token.token_lido)
 

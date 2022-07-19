@@ -7,11 +7,9 @@ class AnalisadorSintatico:
         # criando estado original
         self.producoes = [producao_inicial] # padrão = programa -> lista-de-declaracao
         self.arvore = Arvore(producao_inicial, linha=0)
-        self.arvores = None
         self.eh_reconhecido = False
         self.contador = 0
         self.lista_token = []
-        self.ultima_linha_lido = -1
         # usamos pilha para reconhecer o token
         self.pilha = [{"tokens": tokens, "producoes": self.producoes, "arvore": [self.arvore]}]
 
@@ -26,19 +24,14 @@ class AnalisadorSintatico:
             if (not atual["tokens"]) and (not atual["producoes"]): # ε
                 self.eh_reconhecido = True
                 break
-            elif not atual["tokens"] or not atual["producoes"]:
-                if atual["producoes"]:
-                    proxima_producao = atual["producoes"][0]
-                    proxima_arvore = atual["arvore"][0]
-                    
-                    for i in proxima_producao.derivacao:
-                        vetor_arvore = []
-                        for j in i:
-                            vetor_arvore.append(Arvore(j,pai=proxima_arvore,aceita_vazio=True))
-                        proxima_arvore.filhos.append(vetor_arvore)
-                        
-                        self.pilha.append({"tokens": atual["tokens"] , "producoes": i+atual["producoes"][1:], "arvore": vetor_arvore+atual["arvore"][1:]})
-                
+
+            elif not atual["tokens"] and atual["producoes"]: # caso produções aceitem ε, precisamos abri-las
+                proxima_producao = atual["producoes"][0]
+                proxima_arvore = atual["arvore"][0]
+                self.desenvolve_producao(atual, proxima_producao.derivacao, proxima_arvore)
+                continue
+
+            elif not atual["producoes"]: # possui token mas não tem produções 
                 continue
             
             # pegando o primeiro token e a primeira producao
@@ -49,13 +42,8 @@ class AnalisadorSintatico:
             # verificando se a produção é terminal ou não
 
             if not proxima_producao.eh_terminal:
-                # caso seja vamos adicionar na lista todas as produções derivadas trocando pela produção original
-                for i in proxima_producao.derivacao:
-                    vetor_arvore = []
-                    for j in i:
-                        vetor_arvore.append(Arvore(j, linha=proximo_token.linha,pai=proxima_arvore))
-                    proxima_arvore.filhos.append(vetor_arvore)
-                    self.pilha.append({"tokens": atual["tokens"] , "producoes": i+atual["producoes"][1:], "arvore": vetor_arvore+atual["arvore"][1:]})
+                # caso seja terminal, adicionaremos na lista todas as produções derivadas trocando pela produção original
+                self.desenvolve_producao(atual, proxima_producao.derivacao, proxima_arvore, proximo_token.linha)
                 continue
             else:
                 # caso seja terminal vamos fazer uma verificação de reconhecimento do primeiro token
@@ -63,11 +51,12 @@ class AnalisadorSintatico:
                     proxima_arvore.validada = True
                     proxima_arvore.token_lido = proximo_token
 
-                    if proximo_token.token_nome == "ID":
+                    if proximo_token.token_nome == "ID": # verifica se identificador está na tabela
                         proxima_arvore.validada = (proximo_token.token_lido in identificadores) or (proximo_token.token_lido == "main")
                         if not proxima_arvore.validada:
                             self.eh_reconhecido = False
                             break
+                        
                     #  caso seja o último token a ser reconhecido, podemos fazer as seguintes ações
                     if len(atual["tokens"]) == 1:
                         #  validar também caso seja a ultima produção
@@ -76,20 +65,31 @@ class AnalisadorSintatico:
                             break
                         else:
                             # descarta o atual porque não é possivel mais valida-lo
-                            self.pilha.append({"tokens": [],  "producoes": atual["producoes"][1:] , "arvore": atual["arvore"][1:] })
+                            self.pilha.append({"tokens": [],  "producoes": atual["producoes"][1:] , "arvore": atual["arvore"][1:]}) # não temos mais tokens, mas ainda temos produções
                             continue
                     # caso tenha apenas uma produção terminal e não somente um token não é mais possivel validar entao o descartamos
                     elif len(atual["producoes"]) == 1:
                         continue
-                    # caso nenhuma situação acima tenha acontecido, removemos o primeiro token a primeira produção e adicionamos de novo na pilha
+                    # caso nenhuma situação acima tenha acontecido, removemos o primeiro token e a primeira produção e adicionamos de novo na pilha
                     self.lista_token.append(proximo_token)
                     self.pilha.append({"tokens": atual["tokens"][1:],  "producoes": atual["producoes"][1:], "arvore": atual["arvore"][1:] })
-                    continue
-                else:
-                    # caso o token terminal não seja reconhecido, este é descartado
-                    self.ultima_linha_lido = max([proximo_token.linha, self.ultima_linha_lido])
-                    continue
+                
+                continue
+                
         return self.eh_reconhecido
+
+    def desenvolve_producao(self, atual, derivacao, proxima_arvore, linha_mais_recente=None):
+        for producoes in derivacao:
+            vetor_arvore = []
+            
+            for producao in producoes:
+                arvore = Arvore(producao,pai=proxima_arvore,aceita_vazio=True,linha=linha_mais_recente)
+                vetor_arvore.append(arvore)
+
+            proxima_arvore.filhos.append(vetor_arvore)
+            self.pilha.append({"tokens": atual["tokens"] , "producoes": producoes+atual["producoes"][1:], "arvore": vetor_arvore+atual["arvore"][1:]})
+            # cortamos a produção que já foi aberta ([1:]) 
+
 
 
 from .producao import get_producao_raiz
@@ -99,7 +99,7 @@ def get_analisador_sintatico(tokens, identificadores):
     eh_valido = analisador.reconhece(identificadores)
     
     arvore = analisador.arvore
-    _, token_lido = arvore.limpar_arvore()
+    arvore.podar()
     if eh_valido:
         print("Programa valido")
     else:
@@ -110,5 +110,5 @@ def get_analisador_sintatico(tokens, identificadores):
         for j in range(len(tokens)):
             i = tokens[j]
             if i not in analisador.lista_token:
-                print("Ocorreu um erro ao redor do token {}, na linha {}, ultimo token reconhecido {} linha".format(i.token_lido, i.linha, tokens[j-1].token_lido, tokens[j-1].linha))
+                print("Ocorreu um erro ao redor do token {}, na linha {}, ultimo token reconhecido {} linha {}".format(i.token_lido, i.linha, tokens[j-1].token_lido, tokens[j-1].linha))
                 break
