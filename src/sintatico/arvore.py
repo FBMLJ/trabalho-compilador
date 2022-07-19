@@ -3,7 +3,7 @@
 class Arvore:
     
     erro_instancia = []
-    def __init__(self, producao, linha=None, pai=None, aceita_vazio = False, token_aceito = None):
+    def __init__(self, producao, pai=None, token_aceito = None):
         self.nome = producao.nome
         self.folha = producao.eh_terminal
         self.filhos = []

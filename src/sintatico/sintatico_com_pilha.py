@@ -6,11 +6,11 @@ class AnalisadorSintatico:
         self.tokens = tokens # tokens lidos pelo Léxico
         # criando estado original
         self.producoes = [producao_inicial] # padrão = programa -> lista-de-declaracao
-        self.arvore = Arvore(producao_inicial, linha=0)
+        self.arvore = Arvore(producao_inicial)
         self.eh_reconhecido = False
         self.contador = 0
         self.lista_token = []
-        # usamos pilha para reconhecer o token
+        # usamos pilha para reconhecer os tokens, as produções e a árvore 
         self.pilha = [{"tokens": tokens, "producoes": self.producoes, "arvore": [self.arvore]}]
 
     def reconhece(self, identificadores):
@@ -43,7 +43,7 @@ class AnalisadorSintatico:
 
             if not proxima_producao.eh_terminal:
                 # caso seja terminal, adicionaremos na lista todas as produções derivadas trocando pela produção original
-                self.desenvolve_producao(atual, proxima_producao.derivacao, proxima_arvore, proximo_token.linha)
+                self.desenvolve_producao(atual, proxima_producao.derivacao, proxima_arvore)
                 continue
             else:
                 # caso seja terminal vamos fazer uma verificação de reconhecimento do primeiro token
@@ -78,12 +78,12 @@ class AnalisadorSintatico:
                 
         return self.eh_reconhecido
 
-    def desenvolve_producao(self, atual, derivacao, proxima_arvore, linha_mais_recente=None):
+    def desenvolve_producao(self, atual, derivacao, proxima_arvore):
         for producoes in derivacao:
             vetor_arvore = []
             
             for producao in producoes:
-                arvore = Arvore(producao,pai=proxima_arvore,aceita_vazio=True,linha=linha_mais_recente)
+                arvore = Arvore(producao,pai=proxima_arvore)
                 vetor_arvore.append(arvore)
 
             proxima_arvore.filhos.append(vetor_arvore)
