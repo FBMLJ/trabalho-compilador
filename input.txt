@@ -1,21 +1,10 @@
-
-void main(){
-    int lucas = 222;
-    int VitOr = 3;
-    while(lucas==2) {
-        if(lucas>=VitOr) {
-            lucas=lucas+1;
-        }
-        
-        else {/* testando comentário 123 */
-            if (lucas < 1) {
-                lucas=1+245;
-            }
-
-            else {
-                VitOr = lucas - 1;
-            }
-        }
-    }
-    return 0;
+int teste(int c){
+return c*d;
+}
+int main(void){
+    int id;
+    int a;
+    int b;
+    a = b < 2 * a / b;
+    return teste(a);
 }

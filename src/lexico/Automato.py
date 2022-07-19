@@ -2,7 +2,7 @@ from string import ascii_letters
 
 #Constantes
 OTHER_SPECIAL_CHAR = '()[];\{\},'
-CLOSE_CHAR = ' ()[];\{\}\n+-=<>*/!'
+CLOSE_CHAR = ' ()[];\{\}\n+-=<>*/!,'
 LETTER = ascii_letters
 DIGITS:4 = '1234567890'
 SPACE = ' \n\t'
@@ -12,8 +12,9 @@ PALAVRAS_RESERVADAS = ["if","else","while","void","int","return"]
 
 class Token:
     def __init__(self, token_nome, token_lido):
-        self.token_nome = token_nome
-        self.token_lido = token_lido
+        self.token_nome = token_lido
+        self.token_lido =  token_nome
+        self.linha = None
     def __str__(self):
         return "[{},{}]".format(self.token_lido,self.token_nome)
 
@@ -25,7 +26,6 @@ class Automato:
         self.estados_tokens = estados_tokens
         self.nome_token_atual = None
         self.transicoes = transicoes
-        self.valido = True
 
     def __str__(self):
         return "[{},{}]".format(self.token_lido,self.nome_token_atual)
@@ -41,13 +41,11 @@ class Automato:
 
     # Adicionar char ao automato para mudar seu estado
     def read_new_char(self, char_, proximo_char):
-        # verifica se o automato ainda está ativo
-        if not self.valido:
-            return False 
         self.append_char(char_)
         temp_estado = self.estado_corrente
         estado_de_aceitacao = self.append_char(proximo_char)
-        self.token_lido = self.token_lido[:-1]
+        self.token_lido = self.token_lido[:-1] # corta o último caractere (só é usado para verificação de aceitação) 
+        # desta forma, podemos antever em 1 caractere se token é válido ou não
         
         if estado_de_aceitacao:
             if self.nome_token_atual == "ID" and  self.token_lido in PALAVRAS_RESERVADAS:
@@ -64,13 +62,14 @@ class Automato:
         for key, value in transicoes_estado_corrente.items():
             matching_character = char in key
             if key[0] == "¬":
-                matching_character = char not in key[1:]
+                matching_character = char not in key[1:] # corta a negação
             if matching_character: # verifica se há transição válida para o estado atual com char
                 self.muda_estado(value) # passa para o novo estado
                 if self.estado_corrente in self.estados_de_aceitacao:
                     return True
                 else:
                     return False
+                # return é realizado na primeira transição compatível
 
         print("PROGRAMA INVÁLIDO - O TOKEN NÃO PODE SER RECONHECIDO " + self.token_lido)
         exit()
@@ -102,8 +101,8 @@ def get_automato():
             4: "NUMBER",
             5: "ATRIBUICAO",
             6: "OPERADOR_LOGICO", # >= <= == ><
-            7:"OPERADOR_LOGICO", # != ==
+            7: "OPERADOR_LOGICO", # != ==
             9: "CARACTERE_ESPECIAL",
-            10: "OPERADOR_ALGEBRICO",
+            10: "OPERADOR_ALGEBRICO"
         }
     )
