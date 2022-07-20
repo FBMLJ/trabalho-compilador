@@ -12,6 +12,8 @@ class AnalisadorSintatico:
         self.lista_token = []
         # usamos pilha para reconhecer os tokens, as produções e a árvore 
         self.pilha = [{"tokens": tokens, "producoes": self.producoes, "arvore": [self.arvore]}]
+        # pilha mantem registro de que regra de produção foi adotada em que ponto da análise
+        # sintática, para facilitar tentativa-e-erro
 
     def reconhece(self, identificadores):
         while True:
@@ -34,6 +36,7 @@ class AnalisadorSintatico:
             elif not atual["producoes"]: # possui token mas não tem produções 
                 continue
             
+            # CASO CONVENCIONAL - POSSUÍMOS TOKENS E PRODUÇÕES
             # pegando o primeiro token e a primeira producao
             proxima_producao = atual["producoes"][0]
             proximo_token = atual["tokens"][0]
@@ -64,7 +67,6 @@ class AnalisadorSintatico:
                             self.eh_reconhecido = True
                             break
                         else:
-                            # descarta o atual porque não é possivel mais valida-lo
                             self.pilha.append({"tokens": [],  "producoes": atual["producoes"][1:] , "arvore": atual["arvore"][1:]}) # não temos mais tokens, mas ainda temos produções
                             continue
                     # caso tenha apenas uma produção terminal e não somente um token não é mais possivel validar entao o descartamos
